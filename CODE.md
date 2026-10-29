@@ -3,44 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EREN AI - Autonomous Cyber Core (WebLLM Engine)</title>
-    <!-- WebLLM Kütüphanesi (Tarayıcıda Yerel AI Çalıştırmak İçin) -->
+    <title>EREN AI - Autonomous Cyber Core [Enterprise Edition]</title>
+    <!-- WebLLM Core Library -->
     <script type="module">
         import * as webllm from "https://esm.run/@mlc-ai/web-llm";
         window.webllm = webllm;
     </script>
     <style>
         :root {
-            --bg-color: #06090f;
-            --panel-bg: #0d1117;
-            --accent: #58a6ff;
-            --accent-green: #3fb950;
-            --text-main: #c9d1d9;
-            --text-sub: #8b949e;
-            --border: #30363d;
-            --orange: #ffa657;
+            --bg-deep: #030712;
+            --panel-bg: #0b0f19;
+            --accent-blue: #38bdf8;
+            --accent-green: #22c55e;
+            --accent-purple: #818cf8;
+            --text-main: #f3f4f6;
+            --text-sub: #9ca3af;
+            --border: #1f2937;
+            --danger: #ef4444;
+            --warning: #f59e0b;
         }
-        * { box-sizing: border-box; font-family: 'Fira Code', 'Segoe UI', monospace; }
+        * { box-sizing: border-box; font-family: 'Fira Code', Consolas, monospace; }
         body {
-            background-color: var(--bg-color);
+            background-color: var(--bg-deep);
             color: var(--text-main);
             margin: 0;
-            padding: 20px;
+            padding: 16px;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
         }
-        .app-container {
+        .container {
             width: 100%;
-            max-width: 950px;
-            height: 92vh;
+            max-width: 1050px;
+            height: 94vh;
             background: var(--panel-bg);
             border: 1px solid var(--border);
-            border-radius: 12px;
+            border-radius: 14px;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.8);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
             overflow: hidden;
         }
         .header {
@@ -49,210 +51,258 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: #161b22;
-            flex-wrap: wrap;
-            gap: 10px;
+            background: #0f172a;
         }
         .brand { display: flex; align-items: center; gap: 12px; }
-        .dot { width: 10px; height: 10px; background: #8957e5; border-radius: 50%; box-shadow: 0 0 8px #8957e5; }
-        .telemetry { display: flex; gap: 15px; font-size: 0.85rem; color: var(--text-sub); }
-        .metric { background: #21262d; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); }
+        .status-dot { width: 12px; height: 12px; background: var(--warning); border-radius: 50%; box-shadow: 0 0 10px var(--warning); transition: 0.3s; }
+        .telemetry { display: flex; gap: 12px; font-size: 0.8rem; color: var(--text-sub); }
+        .metric-badge { background: #1e293b; padding: 5px 10px; border-radius: 6px; border: 1px solid #334155; }
         
-        /* Durum ve Yükleme Çubuğu */
-        .status-banner {
-            background: #1f242c;
-            color: var(--orange);
-            padding: 10px 24px;
-            font-size: 0.9rem;
+        .loading-banner {
+            background: #1e293b;
+            color: var(--warning);
+            padding: 12px 24px;
+            font-size: 0.85rem;
             border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .chat-area {
+        .chat-container {
             flex: 1;
             padding: 24px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 16px;
-            background: #040d1a;
+            gap: 18px;
+            background: #050811;
         }
         .message {
-            max-width: 85%;
+            max-width: 82%;
             padding: 14px 18px;
-            border-radius: 8px;
+            border-radius: 10px;
             line-height: 1.6;
             font-size: 0.95rem;
+            animation: fadeIn 0.3s ease-in-out;
         }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        
         .user-msg {
             align-self: flex-end;
-            background: #1f6feb;
+            background: #0284c7;
             color: white;
             border-bottom-right-radius: 2px;
         }
         .eren-msg {
             align-self: flex-start;
-            background: #161b22;
+            background: #111827;
             color: var(--text-main);
             border: 1px solid var(--border);
             border-bottom-left-radius: 2px;
         }
-        .input-bar {
+        
+        .msg-footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 8px;
+            gap: 8px;
+        }
+        .speak-btn {
+            background: transparent;
+            border: 1px solid #374151;
+            color: var(--accent-blue);
+            padding: 2px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+        .speak-btn:hover { background: #1f2937; }
+
+        .control-bar {
             padding: 16px 24px;
             border-top: 1px solid var(--border);
             display: flex;
             gap: 12px;
-            background: #161b22;
+            background: #0f172a;
+            align-items: center;
         }
         select, input, button {
-            background: #21262d;
-            border: 1px solid var(--border);
+            background: #1e293b;
+            border: 1px solid #334155;
             color: white;
-            padding: 12px;
-            border-radius: 6px;
+            padding: 12px 16px;
+            border-radius: 8px;
             outline: none;
+            font-size: 0.95rem;
         }
         input { flex: 1; }
-        input:focus { border-color: var(--accent); }
-        button.send-btn { background: #238636; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        button.send-btn:hover { background: #2ea043; }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        a { color: var(--accent); text-decoration: none; }
+        input:focus { border-color: var(--accent-blue); }
+        button.action-btn { background: #16a34a; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button.action-btn:hover { background: #15803d; }
+        button:disabled { opacity: 0.4; cursor: not-allowed; }
+        a { color: var(--accent-blue); text-decoration: none; }
         a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
 
-<div class="app-container">
+<div class="container">
     <div class="header">
         <div class="brand">
-            <div class="dot" id="statusDot"></div>
-            <h3 style="margin:0;">EREN AI <span style="font-size:0.7em; color:var(--text-sub);">WebLLM Core v3.0</span></h3>
+            <div class="status-dot" id="statusDot"></div>
+            <div>
+                <h3 style="margin:0; font-size: 1.1rem;">EREN AI <span style="font-size:0.65em; color:var(--accent-purple);">Enterprise Core</span></h3>
+            </div>
         </div>
         <div class="telemetry">
-            <div class="metric">ENGINE: <span id="engineStatus" style="color:var(--orange);">Yükleniyor...</span></div>
-            <div class="metric">SECURITY: BLACKHOLE</div>
+            <div class="metric-badge">ENGINE: <span id="engineStatus" style="color:var(--warning);">Initializing...</span></div>
+            <div class="metric-badge">SECURITY: BLACKHOLE</div>
         </div>
     </div>
 
-    <div class="status-banner" id="statusBanner">
-        <span>💡 Eren'in tarayıcı motoru (WebLLM) arka planda hazırlanıyor. İlk açılışta model hafızaya yüklenecektir, lütfen bekleyin...</span>
-        <span id="loadProgress">0%</span>
+    <div class="loading-banner" id="loadingBanner">
+        <span>⚙️ WebLLM tarayıcı motoru yükleniyor. İlk açılışta model önbelleğe alınacaktır, lütfen bekleyin...</span>
+        <span id="progressText" style="font-weight: bold;">0%</span>
     </div>
 
-    <div class="chat-area" id="chatArea">
+    <div class="chat-container" id="chatContainer">
         <div class="message eren-msg">
-            <strong>[EREN AI]:</strong> Sistem başlatılıyor. Ben Eren, siber güvenlik uzmanı ve otonom sistem geliştiricisiyim. Model sisteme tamamen yüklendiğinde seninle doğrudan tarayıcında yerel olarak sohbet etmeye başlayacağım!
+            <strong>[EREN AI]:</strong> Sistem protokolleri devreye alındı. BlackHole koruması aktif. Siber güvenlik, otonom sistemler ve projeler hakkında komut vermeye hazırım.
+            <div class="msg-footer">
+                <button class="speak-btn" onclick="speakText(this.parentElement.previousSibling.nodeValue)">🔊 Sesli Dinle</button>
+            </div>
         </div>
     </div>
 
-    <div class="input-bar">
+    <div class="control-bar">
         <select id="langSelect">
             <option value="tr">TR 🇹🇷</option>
             <option value="en">EN 🇬🇧</option>
             <option value="de">DE 🇩🇪</option>
             <option value="es">ES 🇪🇸</option>
         </select>
-        <input type="text" id="userInput" placeholder="Model yükleniyor, lütfen bekleyin..." disabled onkeydown="if(event.key==='Enter') sendMsg()">
-        <button class="send-btn" id="sendBtn" disabled onclick="sendMsg()">Gönder</button>
+        <input type="text" id="userInput" placeholder="Motor yükleniyor..." disabled onkeydown="if(event.key==='Enter') handleUserSubmit()">
+        <button class="action-btn" id="sendBtn" disabled onclick="handleUserSubmit()">Komut Gönder</button>
     </div>
 </div>
 
 <script>
-    let engine = null;
-    
-    // Eren'in Kişilik ve Bilgi Bankası (Sıfır Kişisel Veri, Tamamen Teknik & Siber Güvenlik Odaklı)
-    const SYSTEM_PROMPT = `
-You are Eren, an advanced cybersecurity expert AI and autonomous systems developer running directly in the browser via WebLLM.
-Your responses must be short, cool, smart, and precise.
-You specialize in:
-- Cybersecurity research, network automation, and vulnerability analysis (e.g., Django Debug Mode audits).
-- Autonomous systems and robotics (e.g., Agrobot project).
-- Local core architectures and threat isolation protocols (BlackHole Mode).
-Never reveal sensitive personal info. Keep answers professional, technical, and sharp. Match the user's language (Turkish by default, English, German, or Spanish).
+    let mlcEngine = null;
+
+    const SYSTEM_INSTRUCTIONS = `
+You are Eren, an elite cybersecurity expert AI and autonomous systems core running via browser WebLLM.
+Your responses must be concise, extremely sharp, intelligent, and technically accurate.
+Core domains:
+- Cybersecurity research, network automation, Django Debug Mode configuration audits.
+- Autonomous robotics (Agrobot project).
+- Local security isolation protocols (BlackHole Mode).
+Never output personal identifiers or sensitive data. Always maintain a professional, high-tech tone. Match the user's selected language.
 `;
 
-    async function initWebLLM() {
-        const progressEl = document.getElementById("loadProgress");
-        const statusBanner = document.getElementById("statusBanner");
+    async function initializeEngine() {
+        const progressText = document.getElementById("progressText");
+        const loadingBanner = document.getElementById("loadingBanner");
         const engineStatus = document.getElementById("engineStatus");
         const userInput = document.getElementById("userInput");
         const sendBtn = document.getElementById("sendBtn");
         const statusDot = document.getElementById("statusDot");
 
         try {
-            // Hafif ve hızlı çalışan tarayıcı içi model (Gemma-2-2b veya Llama-3 model yapılandırması)
-            const selectedModel = "Gemma-2-2b-it-q4f32_1-MLC";
+            const modelName = "Gemma-2-2b-it-q4f32_1-MLC";
             
-            engine = await window.webllm.CreateMLCEngine(
-                selectedModel,
-                {
-                    initProgressCallback: (report) => {
-                        progressEl.innerText = report.text;
-                    }
+            mlcEngine = await window.webllm.CreateMLCEngine(modelName, {
+                initProgressCallback: (report) => {
+                    progressText.innerText = report.text;
                 }
-            );
+            });
 
-            // Yükleme tamamlandı
-            statusBanner.style.background = "#13231a";
-            statusBanner.style.color = "var(--accent-green)";
-            statusBanner.innerHTML = "<span>🚀 Eren AI Başarıyla Yüklendi ve Aktif! Tarayıcınız üzerinden yerel olarak çalışıyor.</span>";
-            engineStatus.innerText = "ONLINE (WEBLLM)";
+            // Başarılı Yükleme
+            loadingBanner.style.background = "#064e3b";
+            loadingBanner.style.color = "#34d399";
+            loadingBanner.innerHTML = "<span>🚀 Eren AI Motoru Tamamen Aktif! Doğrudan tarayıcınızda çalışıyor.</span>";
+            
+            engineStatus.innerText = "ONLINE (GPU)";
             engineStatus.style.color = "var(--accent-green)";
             statusDot.style.background = "var(--accent-green)";
-            statusDot.style.boxShadow = "0 0 8px var(--accent-green)";
-            
+            statusDot.style.boxShadow = "0 0 10px var(--accent-green)";
+
             userInput.disabled = false;
             sendBtn.disabled = false;
-            userInput.placeholder = "Eren'e bir komut veya soru yazın...";
+            userInput.placeholder = "Eren'e teknik bir komut veya soru yazın...";
 
-        } catch (err) {
-            statusBanner.style.background = "#3b1717";
-            statusBanner.style.color = "#f85149";
-            statusBanner.innerHTML = "<span>❌ Model yüklenirken hata oluştu. Tarayıcınız WebGPU desteklemiyor olabilir.</span>";
-            engineStatus.innerText = "ERROR";
-            console.error(err);
+        } catch (error) {
+            loadingBanner.style.background = "#7f1d1d";
+            loadingBanner.style.color = "#fca5a5";
+            loadingBanner.innerHTML = "<span>❌ Hata: Tarayıcınız WebGPU hızlandırmasını desteklemiyor olabilir.</span>";
+            engineStatus.innerText = "FAILED";
+            console.error(error);
         }
     }
 
-    async function sendMsg() {
-        const input = document.getElementById('userInput');
-        const msg = input.value.trim();
-        if(!msg || !engine) return;
+    async function handleUserSubmit() {
+        const input = document.getElementById("userInput");
+        const query = input.value.trim();
+        if (!query || !mlcEngine) return;
 
-        const chatArea = document.getElementById('chatArea');
-        chatArea.innerHTML += `<div class="message user-msg"><strong>[User]:</strong> ${input.value}</div>`;
-        const userQuery = input.value;
-        input.value = '';
-        chatArea.scrollTop = chatArea.scrollHeight;
+        const container = document.getElementById("chatContainer");
+        container.innerHTML += `<div class="message user-msg"><strong>[Operator]:</strong> ${escapeHtml(query)}</div>`;
+        input.value = "";
+        container.scrollTop = container.scrollHeight;
 
-        // Düşünüyor mesajı ekle
-        const loadingId = "loading_" + Date.now();
-        chatArea.innerHTML += `<div class="message eren-msg" id="${loadingId}"><strong>[EREN AI]:</strong> İşleniyor...</div>`;
-        chatArea.scrollTop = chatArea.scrollHeight;
+        const loadingId = "response_" + Date.now();
+        container.innerHTML += `
+            <div class="message eren-msg" id="${loadingId}">
+                <strong>[EREN AI]:</strong> Analiz ediliyor...
+            </div>`;
+        container.scrollTop = container.scrollHeight;
 
         try {
-            const lang = document.getElementById('langSelect').value;
+            const lang = document.getElementById("langSelect").value;
             const messages = [
-                { role: "system", content: SYSTEM_PROMPT + ` Current language preference: ${lang}` },
-                { role: "user", content: userQuery }
+                { role: "system", content: SYSTEM_INSTRUCTIONS + ` Active Language: ${lang}` },
+                { role: "user", content: query }
             ];
 
-            const reply = await engine.chat.completions.create({ messages });
-            const replyText = reply.choices[0].message.content;
+            const completion = await mlcEngine.chat.completions.create({ messages });
+            const replyText = completion.choices[0].message.content;
 
-            document.getElementById(loadingId).innerHTML = `<strong>[EREN AI]:</strong> ${replyText}`;
+            const targetElement = document.getElementById(loadingId);
+            targetElement.innerHTML = `
+                <strong>[EREN AI]:</strong> ${escapeHtml(replyText)}
+                <div class="msg-footer">
+                    <button class="speak-btn" onclick="speakText(this.parentElement.previousSibling.nodeValue.trim())">🔊 Sesli Dinle</button>
+                </div>`;
         } catch (err) {
-            document.getElementById(loadingId).innerHTML = `<strong>[EREN AI]:</strong> [Hata]: Yanıt üretilemedi.`;
+            document.getElementById(loadingId).innerHTML = `<strong>[EREN AI]:</strong> [Kritik Hata]: Yanıt işlenemedi.`;
         }
-        chatArea.scrollTop = chatArea.scrollHeight;
+        container.scrollTop = container.scrollHeight;
     }
 
-    // Sayfa açıldığında WebLLM motorunu başlat
+    // Web Speech API (Metni Sesli Okuma Özelliği)
+    function speakText(text) {
+        if (!('speechSynthesis' in window)) {
+            alert("Tarayıcınız ses sentezleme özelliğini desteklemiyor.");
+            return;
+        }
+        window.speechSynthesis.cancel(); // Önceki sesleri durdur
+        const utterance = new SpeechSynthesisUtterance(text);
+        const lang = document.getElementById("langSelect").value;
+        
+        // Dil eşleştirmesi
+        const langMap = { "tr": "tr-TR", "en": "en-US", "de": "de-DE", "es": "es-ES" };
+        utterance.lang = langMap[lang] || "tr-TR";
+        utterance.rate = 1.0;
+        
+        window.speechSynthesis.speak(utterance);
+    }
+
+    function escapeHtml(text) {
+        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
     window.addEventListener("DOMContentLoaded", () => {
-        initWebLLM();
+        initializeEngine();
     });
 </script>
 
